@@ -1,0 +1,29 @@
+		Struktur Projek
+olicare/
+├── data
+│		└── users.csv
+├── main.py
+├── menus
+│		 ├── akun.py
+│		 ├── __init__.py
+│		 ├── Menu_Admin.py
+│		 ├── Menu_User.py
+├── README.txt
+├── services
+│			├── Catat_Ganti_Oli.py
+│			├── Fitur_Pengingat.py
+│			├── __init__.py
+│			├── Pengelola_Data_Kendaraan.py
+│			└── Rekomendasi_Oli.py
+└── Utilitas
+    ├── cek_akun.py
+    ├── __init__.py
+    ├── Judul.py
+
+
+Setiap Fitur ada didalam file services/
+folder menus berisi tampilan awal dari program 
+folder utilitas berisi alat-alat yang bisa digunakan, seperti Judul berfungsi untuk menampilkan teks 
+data .csv berada pada folder data/
+
+main.py menunjukan awal di eksekusinya program
