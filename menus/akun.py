@@ -21,7 +21,7 @@ CSV_FILE = os.path.join(direktori_sekarang,'..','data','users.csv')
 
 def login():
     Judul("Login Page")
-    username = input("Masukkan Username: ").strip()
+    username = input("Masukkan Username: ").lower().strip()
     password = getpass("Masukkan Password: ")
 
     if not username or not password:
