@@ -16,23 +16,30 @@ def main():
 		print("1. Login")
 		print("2. Registrasi")
 		print("3. Keluar")
-		userInput = int(input("Masukan Pilihan Anda 1/2/3 (Default: 3) : "))
+		userInput =int(input("Masukan Pilihan Anda 1/2/3: "))
 
 
 		if userInput == 1:
 			user_login = login()
-			if(user_login['role'] == 'admin'):
-				menu_admin()
-				break
+			if user_login is not None:
+				if user_login['role'] == 'admin':
+					menu_admin()
+					break
+				elif user_login['role'] == 'user':
+					menu_user()
+					break;
 			else:
-				menu_user()
-				break
+				print('Proses Login Gagal')
+
+			
 		elif userInput == 2:
 			registrasi()
 			break;
 		elif userInput == 3:
 			print("Terima Kasih Sudah Menggunakan OliCare")
 			break
+		else:
+			print("Pilihan Invalid")
 
 
 

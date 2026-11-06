@@ -2,7 +2,7 @@ import os
 import csv
 
 direktori_sekarang = os.path.dirname(__file__)
-file_csv = os.path.join(direktori_sekarang,'..','data','users.csv')
+file_csv = os.path.join(direktori_sekarang,'..','data','akun.csv')
 
 
 def cek_akun(username):

@@ -17,7 +17,7 @@ import csv
 import os
 
 direktori_sekarang = os.path.dirname(__file__)
-CSV_FILE = os.path.join(direktori_sekarang,'..','data','users.csv')
+CSV_FILE = os.path.join(direktori_sekarang,'..','data','akun.csv')
 
 
 
@@ -26,12 +26,13 @@ def login():
 
     while max_percobaan > 0:
         Judul("Login Page")
+        name = input("Masukan nama dari pengguna: ").lower().strip()
         username = input("Masukkan Username: ").lower().strip()
         password = getpass("Masukkan Password: ")
 
-        if not username or not password:
+        if not username and not password and not name:
             max_percobaan -= 1
-            print("Username dan password tidak boleh kosong!")
+            print("field tidak boleh kosong!")
             continue
 
         user = cek_akun(username)
@@ -59,23 +60,24 @@ def login():
 def registrasi():
     Judul("Registrasi")
     print("Silakan buat username dan password baru.")
-
+    nama = input("Masukan nama: ").lower().strip()
     username = input("Masukkan Username: ").strip()
     password = input("Masukkan Password: ").strip()
-    if not username or not password:
-        return False, "Username dan password tidak boleh kosong!"
+    if not username or not password or not nama:
+        return False, "Field tidak boleh ada yang kosong!"
 
     akun = cek_akun(username)
     if akun:
-        return False, "Username sudah terdaftar! Silakan gunakan username lain."
+        return False, "username sudah terdaftar! Silakan gunakan username lain."
 
     # Pendaftaran umum otomatis diberikan role 'user'
 
     with open(CSV_FILE, "a", newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow([username, password,'user'])
-
-    return True, "Akun berhasil dibuat! Silakan login."
+        writer.writerow([nama, username, password,'user'])
+        
+    print("Akun anda berhasil dibuat silahkan login")
+    return True
 
 
 
