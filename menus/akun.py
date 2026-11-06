@@ -19,24 +19,40 @@ import os
 direktori_sekarang = os.path.dirname(__file__)
 CSV_FILE = os.path.join(direktori_sekarang,'..','data','users.csv')
 
+
+
 def login():
-    Judul("Login Page")
-    username = input("Masukkan Username: ").lower().strip()
-    password = getpass("Masukkan Password: ")
+    max_percobaan = 3
 
-    if not username or not password:
-        return False, "Username dan password tidak boleh kosong!", None
+    while max_percobaan > 0:
+        Judul("Login Page")
+        username = input("Masukkan Username: ").lower().strip()
+        password = getpass("Masukkan Password: ")
 
-    user = cek_akun(username)
+        if not username or not password:
+            max_percobaan -= 1
+            print("Username dan password tidak boleh kosong!")
+            continue
 
-    if user is None:
-        return False, "Akun tidak ditemukan!", None
+        user = cek_akun(username)
 
-    if user['password'] == password:
-        print(f"Selamat datang, {user['username']}!", user)
-        return True
+        if user is not None and user['password'] == password:
+            if user['role'] == 'admin':
+                print(f"Selamat datang admin {user['username']}")
+            else:
+                print(f"Selamat datang, {user['username']}!")
+            return user          # kembalikan data user agar bisa dipakai menu lain
 
-    return False, "Username atau password salah!", None
+        max_percobaan -= 1
+        print(f"Username atau password salah! Sisa percobaan: {max_percobaan}")
+
+    print("Anda tidak bisa melakukan login lagi")
+    return None
+
+    
+    
+
+    
 
 
 
@@ -57,7 +73,7 @@ def registrasi():
 
     with open(CSV_FILE, "a", newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow([username, password])
+        writer.writerow([username, password,'user'])
 
     return True, "Akun berhasil dibuat! Silakan login."
 

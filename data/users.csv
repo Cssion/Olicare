@@ -1,3 +1,4 @@
-username,password
-admin,admin123
-cussion,123
+username,password,role
+admin,admin123,admin
+cussion,1234,admin
+user,user,user

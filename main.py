@@ -4,7 +4,10 @@
 # CATATAN: Jaga file ini tetap pendek. Logika tidak ditulis di sini.
 
 from menus.akun import login, registrasi
+from menus.Menu_Admin import menu_admin
+from menus.Menu_User import menu_user
 from Utilitas.Judul import Judul
+
 
 def main():
 	Judul("OILCARE v1.0")
@@ -17,8 +20,13 @@ def main():
 
 
 		if userInput == 1:
-			login()
-			break;
+			user_login = login()
+			if(user_login['role'] == 'admin'):
+				menu_admin()
+				break
+			else:
+				menu_user()
+				break
 		elif userInput == 2:
 			registrasi()
 			break;

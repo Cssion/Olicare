@@ -4,3 +4,6 @@
 # PILIHAN: Data kendaraan, catat kilometer, cek jadwal ganti oli,
 #          catat penggantian oli, riwayat, rekomendasi oli, logout.
 # CATATAN: Hanya menampilkan menu dan menerima input. Perhitungan ada di services/.
+
+def menu_user():
+    print("menu_user")
