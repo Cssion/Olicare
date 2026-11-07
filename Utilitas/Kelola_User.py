@@ -59,12 +59,30 @@ def updateUser(users):
             return
 
     print("User tidak ditemukan")
+
+def deleteUser(users):
+    lihatUser()
+    username = text(input("Masukan username dari user yang ingin dihapus: "))
+
+    for u in users:
+        if u['username'] == username:
+            konfirmasi = text(input(f"Apakah anda yakin ingin menghapus user {u['username']}? y/n: "))
+            if konfirmasi != 'y':
+                print("Penghapusan Dibatalkan")
+                return
+            users.remove(u)
+            writeFile(users)
+            print("User Berhasil Dihapus")
+            return
+    print("User tidak ditemukan")
+    
             
 
 
 
 
 def kelola_user():
+    load_users = readFile()
     while True:
         Judul("KELOLA DASAR USER")
         print("1. Lihat Data User")
@@ -76,10 +94,9 @@ def kelola_user():
             lihatUser()
             break
         elif(userChoose == 2):
-            load_users = readFile()
             updateUser(load_users)
             break
         elif(userChoose == 3):
-            hapusUser()
+            deleteUser(load_users)
             break
     
