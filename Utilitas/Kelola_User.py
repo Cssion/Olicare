@@ -25,7 +25,7 @@ def lihatUser():
     user = readFile()
 
     print(f"{' ':<2}{'NAMA':<20}{'USERNAME':<20}{'ROLE':<20}")
-    print("-" * 40)
+    print("-" * 60)
     for u in user:
         print(f"{u['nama']:<20}{u['username']:<20}{u['role']:<20}")
 
