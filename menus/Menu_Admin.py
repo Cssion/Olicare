@@ -8,7 +8,6 @@ from Utilitas.Kelola_User import kelola_user
 from Utilitas.Kelola_Kendaraan import kelola_kendaraan
 from Utilitas.Tinjau_Data_Oli import tinjau_oli
 def menu_admin():
-    Judul("ADMIN DASHBOARD")
     while True:
         print("1. Kelola Data User")
         print("2. Kelola Data Kendaraan")

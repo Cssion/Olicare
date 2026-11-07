@@ -38,10 +38,6 @@ def login():
         user = cek_akun(username)
 
         if user is not None and user['password'] == password:
-            if user['role'] == 'admin':
-                print(f"Selamat datang admin {user['username']}")
-            else:
-                print(f"Selamat datang, {user['username']}!")
             return user          # kembalikan data user agar bisa dipakai menu lain
 
         max_percobaan -= 1

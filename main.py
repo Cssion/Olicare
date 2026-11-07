@@ -23,9 +23,13 @@ def main():
 			user_login = login()
 			if user_login is not None:
 				if user_login['role'] == 'admin':
+					Judul("DASHBOARD ADMIN")
+					print(f"Selamat datang admin {user_login['username']}")
 					menu_admin()
 					break
 				elif user_login['role'] == 'user':
+					Judul("DASHBOARD")
+					print(f"Selamat datang {user_login['username']}")
 					menu_user()
 					break;
 			else:
