@@ -46,18 +46,5 @@ def main():
 			print("Pilihan Invalid")
 
 
-
-
-
-
-	
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
 	main()

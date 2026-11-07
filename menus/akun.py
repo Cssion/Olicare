@@ -13,6 +13,7 @@
 from Utilitas.Judul import Judul
 from getpass import getpass
 from Utilitas.cek_akun import cek_akun
+from Utilitas.Rapihkan_Text import text
 import csv
 import os
 
@@ -26,8 +27,8 @@ def login():
 
     while max_percobaan > 0:
         Judul("Login Page")
-        name = input("Masukan nama dari pengguna: ").lower().strip()
-        username = input("Masukkan Username: ").lower().strip()
+        name = text(input("Masukan nama dari pengguna: "))
+        username = text(input("Masukkan Username: "))
         password = getpass("Masukkan Password: ")
 
         if not username and not password and not name:
@@ -56,7 +57,7 @@ def login():
 def registrasi():
     Judul("Registrasi")
     print("Silakan buat username dan password baru.")
-    nama = input("Masukan nama: ").lower().strip()
+    nama = text(input("Masukan nama: "))
     username = input("Masukkan Username: ").strip()
     password = input("Masukkan Password: ").strip()
     if not username or not password or not nama:
