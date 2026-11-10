@@ -4,112 +4,94 @@
 #          km/hari, tentukan status (aman / mendekati / jatuh tempo).
 
 
-
-"""
-services/riwayatGantiOli.py
-
-Logika fitur Riwayat Penggantian Oli (SKPL 3.1.5, Flowmap 4.2, DFD 3.2).
-Seluruh logika dijadikan satu fungsi: riwayat_ganti_oli(username).
-Tidak ada print/input; tampilan ada di menus/Menu_Riwayat_Oli.py.
-
-Pemakaian (misalnya di main.py):
-    from services.riwayatGantiOli import riwayat_ganti_oli
-    hasil = riwayat_ganti_oli(username)
-
-Struktur data mengikuti Kamus Data SKPL:
-    kendaraan.csv:
-        id, username, pemilik, merek, tipe, jenis, tahun, nomor_polisi, km,
-        km_ganti_terakhir, tanggal_ganti_terakhir, oli_terakhir,
-        interval_km, interval_hari, id_katalog, km_diperbarui
-    penggantian_oli.csv:
-        id, id_kendaraan, username, tanggal, km, oli, bengkel, harga, catatan
-"""
-
 import os
 from datetime import datetime, timedelta
 
-from Utilitas.Helper_Riwayat import baca_csv, ke_int, ke_tanggal
+from Utilitas.Helper_Riwayat import baca_csv, ke_angka, ke_tanggal
 
-# data/ berada satu level di atas folder services/
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-FILE_KENDARAAN = os.path.join(DATA_DIR, "kendaraan.csv")
-FILE_PENGGANTIAN = os.path.join(DATA_DIR, "penggantian_oli.csv")
+# Lokasi file data (folder data/ ada satu tingkat di atas folder services/)
+FOLDER_DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+FILE_KENDARAAN = os.path.join(FOLDER_DATA, "kendaraan.csv")
+FILE_PENGGANTIAN = os.path.join(FOLDER_DATA, "penggantian_oli.csv")
 
 
-def riwayat_ganti_oli(username, id_kendaraan=None):
+def ambil_tanggal(catatan):
+    """Dipakai untuk mengurutkan riwayat berdasarkan tanggal."""
+    return catatan["tanggal"]
+
+
+def riwayat_ganti_oli(username):
     """
-    Ambil riwayat penggantian oli milik pengguna beserta jadwal berikutnya.
+    Mengambil riwayat penggantian oli semua kendaraan milik pengguna.
 
-    Parameter:
-        username      : pengguna yang sedang login.
-        id_kendaraan  : (opsional) batasi hasil ke satu kendaraan.
-
-    Kembalian: list of dict, satu dict per kendaraan milik pengguna
-    (list kosong bila pengguna belum punya kendaraan):
-        {
-            "kendaraan"    : dict data kendaraan,
-            "riwayat"      : list catatan penggantian (terbaru ke terlama),
-            "jumlah"       : jumlah penggantian,
-            "total_biaya"  : jumlah seluruh biaya,
-            "jadwal"       : {"target_km", "sisa_km",
-                              "target_tanggal" (datetime), "sisa_hari"}
-                             (nilai None bila data tidak cukup),
-        }
+    Hasilnya berupa list. Setiap isinya adalah dictionary dengan kunci:
+        kendaraan   : data kendaraan
+        riwayat     : list catatan penggantian oli (terbaru di urutan pertama)
+        jumlah      : banyaknya penggantian
+        total_biaya : jumlah semua biaya
+        jadwal      : jadwal penggantian berikutnya (isi None kalau datanya kurang)
     """
-    semua_penggantian = baca_csv(FILE_PENGGANTIAN)
+    semua_kendaraan = baca_csv(FILE_KENDARAAN)
+    semua_catatan = baca_csv(FILE_PENGGANTIAN)
     hasil = []
 
-    for kendaraan in baca_csv(FILE_KENDARAAN):
-        if kendaraan.get("username") != username:
+    for kendaraan in semua_kendaraan:
+        # Lewati kendaraan milik pengguna lain
+        if kendaraan["username"] != username:
             continue
-        if id_kendaraan is not None and str(kendaraan.get("id")) != str(id_kendaraan):
-            continue
 
-        # Catatan penggantian milik kendaraan ini, terbaru ke terlama
-        riwayat = [
-            r
-            for r in semua_penggantian
-            if str(r.get("id_kendaraan")) == str(kendaraan.get("id"))
-            and r.get("username") == username
-        ]
-        riwayat.sort(
-            key=lambda r: (ke_tanggal(r.get("tanggal")) or datetime.min, ke_int(r.get("km"), 0)),
-            reverse=True,
-        )
+        # 1. Kumpulkan catatan penggantian oli milik kendaraan ini
+        riwayat = []
+        for catatan in semua_catatan:
+            if catatan["id_kendaraan"] == kendaraan["id"] and catatan["username"] == username:
+                riwayat.append(catatan)
 
-        total_biaya = sum(ke_int(r.get("harga"), 0) for r in riwayat)
+        # 2. Urutkan dari tanggal terbaru ke terlama
+        riwayat.sort(key=ambil_tanggal, reverse=True)
 
-        # Jadwal berikutnya: basis penggantian terakhir, fallback data kendaraan
-        interval_km = ke_int(kendaraan.get("interval_km"))
-        interval_hari = ke_int(kendaraan.get("interval_hari"))
-        km_sekarang = ke_int(kendaraan.get("km"))
+        # 3. Hitung total biaya
+        total_biaya = 0
+        for catatan in riwayat:
+            biaya = ke_angka(catatan["harga"])
+            if biaya is not None:
+                total_biaya += biaya
 
-        terakhir = riwayat[0] if riwayat else {}
-        km_terakhir = ke_int(terakhir.get("km"), ke_int(kendaraan.get("km_ganti_terakhir")))
-        tgl_terakhir = ke_tanggal(terakhir.get("tanggal")) or ke_tanggal(
-            kendaraan.get("tanggal_ganti_terakhir")
-        )
+        # 4. Hitung jadwal penggantian berikutnya
+        jadwal = {
+            "target_km": None,
+            "sisa_km": None,
+            "target_tanggal": None,
+            "sisa_hari": None,
+        }
 
-        jadwal = {"target_km": None, "sisa_km": None, "target_tanggal": None, "sisa_hari": None}
+        interval_km = ke_angka(kendaraan["interval_km"])
+        interval_hari = ke_angka(kendaraan["interval_hari"])
+        km_sekarang = ke_angka(kendaraan["km"])
+
+        # Ambil data penggantian terakhir (dari riwayat, kalau kosong dari data kendaraan)
+        if len(riwayat) > 0:
+            km_terakhir = ke_angka(riwayat[0]["km"])
+            tanggal_terakhir = ke_tanggal(riwayat[0]["tanggal"])
+        else:
+            km_terakhir = ke_angka(kendaraan["km_ganti_terakhir"])
+            tanggal_terakhir = ke_tanggal(kendaraan["tanggal_ganti_terakhir"])
 
         if interval_km is not None and km_terakhir is not None:
             jadwal["target_km"] = km_terakhir + interval_km
             if km_sekarang is not None:
                 jadwal["sisa_km"] = jadwal["target_km"] - km_sekarang
 
-        if interval_hari is not None and tgl_terakhir is not None:
-            jadwal["target_tanggal"] = tgl_terakhir + timedelta(days=interval_hari)
-            jadwal["sisa_hari"] = (jadwal["target_tanggal"].date() - datetime.now().date()).days
+        if interval_hari is not None and tanggal_terakhir is not None:
+            jadwal["target_tanggal"] = tanggal_terakhir + timedelta(days=interval_hari)
+            selisih = jadwal["target_tanggal"] - datetime.now()
+            jadwal["sisa_hari"] = selisih.days + 1
 
-        hasil.append(
-            {
-                "kendaraan": kendaraan,
-                "riwayat": riwayat,
-                "jumlah": len(riwayat),
-                "total_biaya": total_biaya,
-                "jadwal": jadwal,
-            }
-        )
+        hasil.append({
+            "kendaraan": kendaraan,
+            "riwayat": riwayat,
+            "jumlah": len(riwayat),
+            "total_biaya": total_biaya,
+            "jadwal": jadwal,
+        })
 
     return hasil
