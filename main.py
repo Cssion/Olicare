@@ -1,45 +1,55 @@
+
 # main.py
 # FUNGSI : Pintu masuk program. Jalankan dengan: python main.py
 # ISI    : Menyiapkan storage, membuat semua service, lalu membuka MainMenu.
 # CATATAN: Jaga file ini tetap pendek. Logika tidak ditulis di sini.
 
 from menus.akun import login, registrasi
+from menus.Menu_Admin import menu_admin
+from menus.Menu_User import menu_user
 from Utilitas.Judul import Judul
 
+
 def main():
-	Judul("OILCARE v1.0")
-	while True:
-		print("Silahkan Login / registrasi Terlebih Dulu")
-		print("1. Login")
-		print("2. Registrasi")
-		print("3. Keluar")
-		userInput = int(input("Masukan Pilihan Anda 1/2/3 (Default: 3) : "))
+    Judul("OILCARE v1.0")
 
+    while True:
+        print("Silahkan Login / registrasi Terlebih Dulu")
+        print("1. Login")
+        print("2. Registrasi")
+        print("3. Keluar")
 
-		if userInput == 1:
-			login()
-			break;
-		elif userInput == 2:
-			registrasi()
-			break;
-		elif userInput == 3:
-			print("Terima Kasih Sudah Menggunakan OliCare")
-			break
+        userInput = int(input("Masukan Pilihan Anda 1/2/3: "))
 
+        if userInput == 1:
+            user_login = login()
 
+            if user_login is not None:
+                if user_login['role'] == 'admin':
+                    Judul("DASHBOARD ADMIN")
+                    print(f"Selamat datang admin {user_login['username']}")
+                    menu_admin()
+                    break
 
+                elif user_login['role'] == 'user':
+                    Judul("DASHBOARD")
+                    print(f"Selamat datang {user_login['username']}")
+                    menu_user(user_login['username'])
+                    break
 
+            else:
+                print("Proses Login Gagal")
 
+        elif userInput == 2:
+            registrasi()
 
+        elif userInput == 3:
+            print("Terima Kasih Sudah Menggunakan OliCare")
+            break
 
-	
-
-
-
-
-
-
+        else:
+            print("Pilihan Invalid")
 
 
 if __name__ == "__main__":
-	main()
+    main()

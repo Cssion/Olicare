@@ -1,69 +1,77 @@
-# menus/main_menu.py
-# FUNGSI : Menu awal program: Login, Registrasi, Keluar.
-# TUGAS  : Setelah login berhasil, arahkan ke UserMenu atau AdminMenu
-#          sesuai role.
 
-#=====NOTE=======
-# Setiap user harus memiliki role yang berbeda yaitu User Biasa & admin
-# Agar dapat membedakan mana yang masuk ke menu admin dan mana yang masuk ke menu user
-# Belum ada nambahin fitur kayak gitu disini
-# Baru nambahin validasi akun dan file csv usernya aja
+# menus/akun.py
+# FUNGSI : Mengelola proses login dan registrasi akun.
+# TUGAS  : Memvalidasi akun berdasarkan data pada file CSV.
+# CATATAN: Akun baru otomatis mendapatkan role 'user'.
 
-
-from Utilitas.Judul import Judul
-from getpass import getpass
-from Utilitas.cek_akun import cek_akun
 import csv
 import os
+from getpass import getpass
+from Utilitas.Judul import Judul
+from Utilitas.Rapihkan_Text import text
+
 
 direktori_sekarang = os.path.dirname(__file__)
-CSV_FILE = os.path.join(direktori_sekarang,'..','data','users.csv')
+CSV_FILE = os.path.join(direktori_sekarang, '..', 'data', 'akun.csv')
+
 
 def login():
-    Judul("Login Page")
-    username = input("Masukkan Username: ").lower().strip()
-    password = getpass("Masukkan Password: ")
+    max_percobaan = 3
 
-    if not username or not password:
-        return False, "Username dan password tidak boleh kosong!", None
+    while max_percobaan > 0:
+        Judul("Login Page")
 
-    user = cek_akun(username)
+        username = text(input("Masukkan Username: "))
+        password = getpass("Masukkan Password: ")
 
-    if user is None:
-        return False, "Akun tidak ditemukan!", None
+        if not username or not password:
+            max_percobaan -= 1
+            print("Username dan password tidak boleh kosong!")
+            continue
 
-    if user['password'] == password:
-        print(f"Selamat datang, {user['username']}!", user)
-        return True
+        with open(CSV_FILE, 'r', newline='', encoding='utf-8-sig') as file:
+            reader = csv.DictReader(file, skipinitialspace=True)
 
-    return False, "Username atau password salah!", None
+            for user in reader:
+                if (
+                    user['username'].strip().lower() == username.strip().lower()
+                    and user['password'].strip() == password.strip()
+                ):
+                    print("Login berhasil!")
+                    return user
 
+        max_percobaan -= 1
+        print(f"Username atau password salah! Sisa percobaan: {max_percobaan}")
+
+    print("Anda tidak bisa melakukan login lagi.")
+    return None
 
 
 def registrasi():
     Judul("Registrasi")
+
     print("Silakan buat username dan password baru.")
 
+    nama = text(input("Masukkan Nama: "))
     username = input("Masukkan Username: ").strip()
-    password = input("Masukkan Password: ").strip()
-    if not username or not password:
-        return False, "Username dan password tidak boleh kosong!"
+    password = getpass("Masukkan Password: ").strip()
 
-    akun = cek_akun(username)
-    if akun:
-        return False, "Username sudah terdaftar! Silakan gunakan username lain."
+    if not nama or not username or not password:
+        print("Field tidak boleh ada yang kosong!")
+        return False
 
-    # Pendaftaran umum otomatis diberikan role 'user'
+    with open(CSV_FILE, 'r', newline='', encoding='utf-8-sig') as file:
+        reader = csv.DictReader(file, skipinitialspace=True)
+        data = list(reader)
 
-    with open(CSV_FILE, "a", newline='', encoding='utf-8') as file:
+    for user in data:
+        if user['username'].strip().lower() == username.lower():
+            print("Username sudah terdaftar! Silakan gunakan username lain.")
+            return False
+
+    with open(CSV_FILE, 'a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow([username, password])
+        writer.writerow([nama, username, password, 'user'])
 
-    return True, "Akun berhasil dibuat! Silakan login."
-
-
-
-
-
-
-
+    print("Akun Anda berhasil dibuat. Silakan login.")
+    return True
